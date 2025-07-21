@@ -144,7 +144,7 @@ const FilterUploadPage = () => {
   return (
     <div className="max-w-xl mx-auto  p-6 mb-5 ">
       <h1 className="text-3xl font-bold mb-6 text-center text-blue-600 relative">
-        <span className="before:content-['🔍'] before:mr-2">Phone Number Lookup</span>
+        <span className="before:content-['🔍'] before:mr-2">Phone Number Lookup search</span>
       </h1>
       
       <div className="flex justify-center mb-6 space-x-4">
