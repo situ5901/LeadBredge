@@ -31,7 +31,7 @@ export default function AdminPanelLayout({
     router.prefetch("/superadmin/Agents");
     router.prefetch("/superadmin/lenderstatus");
     router.prefetch("/superadmin/workupdate");
-     router.prefetch("/superadmin/data-management");
+     router.prefetch("/superadmin/Find-by-Phone");
        router.prefetch("/superadmin/dedupe-check");
   }, [router]);
 

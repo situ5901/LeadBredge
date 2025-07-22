@@ -24,7 +24,7 @@ export default function MemberPanelLayout({
   };
 
   useEffect(() => {
-    router.prefetch("/agent/dashboard");
+    router.prefetch("/agent/");
     router.prefetch("/agent/lead-status");
   }, [router]);
 
@@ -65,8 +65,8 @@ export default function MemberPanelLayout({
             <ul className="space-y-1">
               <li>
                 <Link
-                  href="/agent/dashboard"
-                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${pathname === "/agent/dashboard"
+                  href="/agent/"
+                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${pathname === "/agent/"
                       ? "bg-gray-700 text-white"
                       : "text-gray-300 hover:bg-gray-700 hover:text-white"
                     }`}

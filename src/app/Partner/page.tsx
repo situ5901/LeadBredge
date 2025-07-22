@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Dedupe from "./dedupe-check/page"
 import {
   Send,
   CheckCircle,
@@ -32,11 +33,7 @@ export default function MemberDashboard() {
   ];
 
   return (
-    <div className="bg-gray-100 p-6 min-h-screen">
-      <h1 className="text-4xl font-bold text-gray-800 mb-10 text-center">
-        Agent Dashboard
-      </h1>
-
+    <div className="">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {stats.map((stat, idx) => (
           <div
@@ -58,8 +55,9 @@ export default function MemberDashboard() {
         ))}
       </div>
 
-      <div className="p-6 bg-white rounded-2xl shadow text-center text-gray-600">
-        <p>Charts and analytics for performance will appear here.</p>
+      <div className=" bg-white rounded-2xl shadow text-center">
+       <Dedupe/>
+
       </div>
     </div>
   );

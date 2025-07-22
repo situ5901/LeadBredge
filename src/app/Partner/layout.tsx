@@ -13,9 +13,11 @@ export default function MemberPanelLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userName, setUserName] = useState("User");
 
   const handleLogout = () => {
     localStorage.removeItem("role");
+    localStorage.removeItem("userName");
     router.push("/");
   };
 
@@ -24,8 +26,12 @@ export default function MemberPanelLayout({
   };
 
   useEffect(() => {
-    router.prefetch("/member/dashboard");
-    router.prefetch("/member/Dedupe-check");
+    // Get user name from localStorage when component mounts
+    const name = localStorage.getItem("userName") || "User";
+    setUserName(name);
+
+    router.prefetch("/Partner/");
+    router.prefetch("/Partner/dedupe-check");
   }, [router]);
 
   return (
@@ -48,7 +54,7 @@ export default function MemberPanelLayout({
           <div className="flex items-center justify-between p-4 border-b border-gray-700">
             <Link href="/member/dashboard" className="flex items-center space-x-2">
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-                Partner
+                Keshvacredit
               </span>
             </Link>
             <button
@@ -65,8 +71,8 @@ export default function MemberPanelLayout({
             <ul className="space-y-1">
               <li>
                 <Link
-                  href="/member/dashboard"
-                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${pathname === "/member/dashboard"
+                  href="/Partner/"
+                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${pathname === "/Partner/"
                       ? "bg-gray-700 text-white"
                       : "text-gray-300 hover:bg-gray-700 hover:text-white"
                     }`}
@@ -75,18 +81,14 @@ export default function MemberPanelLayout({
                   Dashboard
                 </Link>
               </li>
-
               <li>
-                <Link
-                  href="/member/dedupe-check"
-                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${pathname === "/member/dedupe-check"
-                      ? "bg-gray-700 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`}
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
                 >
-                  <Send className="w-5 h-5 mr-3" />
-                  Dedupe-check
-                </Link>
+                  <LogOut className="w-5 h-5 mr-3" />
+                  Logout
+                </button>
               </li>
             </ul>
           </nav>
@@ -111,21 +113,24 @@ export default function MemberPanelLayout({
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={handleLogout}
-                className="flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-gray-100 rounded-md transition-colors"
-              >
-                <LogOut className="w-5 h-5 mr-2" />
-                Logout
-              </button>
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium text-sm">
+                    {userName?.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+                <div className="hidden md:block">
+                  <p className="text-sm font-medium text-gray-700">{userName}</p>
+                </div>
+              </div>
             </div>
           </div>
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto mt-16 p-4 md:p-6 ">
+        <main className="flex-1 overflow-y-auto mt-16 p-4 md:p-6">
           <div className="max-w-7xl mx-auto">
-            <div className=" shadow p-4 md:p-6">
+            <div className="p-4 md:p-6">
               <Toaster position="top-right" />
               {children}
             </div>

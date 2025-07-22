@@ -142,130 +142,189 @@ const FilterUploadPage = () => {
   }
 
   return (
-    <div className="max-w-xl mx-auto  p-6 mb-5 ">
-      <h1 className="text-3xl font-bold mb-6 text-center text-blue-600 relative">
-        <span className="before:content-['🔍'] before:mr-2">Phone Number Lookup search</span>
-      </h1>
-      
-      <div className="flex justify-center mb-6 space-x-4">
-        <button
-          onClick={() => setSearchMode("phone")}
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
-            searchMode === "phone" ? "bg-blue-600 text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          Single Phone Search
-        </button>
-        <button
-          onClick={() => setSearchMode("excel")}
-          className={`px-4 py-2 rounded-lg font-medium transition-all ${
-            searchMode === "excel" ? "bg-blue-600 text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          Bulk Excel Upload
-        </button>
-      </div>
+   <div className="max-w-2xl mx-auto p-6 mb-5">
+  <div className="text-center mb-8">
+    <h1 className="text-3xl font-bold text-gray-800 mb-2">
+      <span className="relative">
+        <span className="absolute left-0 top-0 -ml-6 -mt-1 text-2xl"></span>
+        Phone Number Lookup
+      </span>
+    </h1>
+    <p className="text-gray-600">Search by single phone number or upload an Excel file</p>
+  </div>
+  
+  <div className="flex justify-center mb-8">
+    <div className="inline-flex rounded-md shadow-sm" role="group">
+      <button
+        onClick={() => setSearchMode("phone")}
+        className={`px-6 py-3 text-sm font-medium rounded-l-lg border ${
+          searchMode === "phone" 
+            ? "bg-blue-600 text-white border-blue-600" 
+            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+        }`}
+      >
+        <span className="flex items-center">
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+          Single Search
+        </span>
+      </button>
+      <button
+        onClick={() => setSearchMode("excel")}
+        className={`px-6 py-3 text-sm font-medium rounded-r-lg border ${
+          searchMode === "excel" 
+            ? "bg-blue-600 text-white border-blue-600" 
+            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+        }`}
+      >
+        <span className="flex items-center">
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Bulk Upload
+        </span>
+      </button>
+    </div>
+  </div>
 
-      {searchMode === "phone" ? (
-        <div className="space-y-4">
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Enter Phone Number</label>
+  {searchMode === "phone" ? (
+    <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+          <div className="relative rounded-md shadow-sm">
             <input
               type="text"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="e.g. 9876543210"
-              className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter 10-digit phone number"
+              className="block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 border text-gray-700"
             />
-            <button
-              onClick={handleSingleSearch}
-              disabled={loading || !phoneNumber}
-              className="mt-3 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300"
-            >
-              {loading ? "Searching..." : "Search"}
-            </button>
           </div>
-
-          {singleResult && (
-            <div className="bg-green-50 p-4 rounded-lg border border-green-100 mt-4">
-              <h3 className="font-bold text-green-800 mb-2">Result Found</h3>
-              <pre className="bg-white p-3 rounded text-sm overflow-x-auto">
-                {JSON.stringify(singleResult, null, 2)}
-              </pre>
-            </div>
-          )}
-
-          {progress && !loading && !singleResult && (
-            <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100 text-yellow-800">
-              {progress}
-            </div>
-          )}
         </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Upload Excel File</label>
-            <div className="flex items-center space-x-4">
-              <label className="flex-1 cursor-pointer">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-500 transition">
-                  <span className="block text-purple-600 font-medium">
-                    {selectedFile ? selectedFile.name : "Choose file..."}
-                  </span>
-                  <input
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                    onChange={handleFileChange}
-                    className="hidden"
+        
+        <button
+          onClick={handleSingleSearch}
+          disabled={loading || !phoneNumber}
+          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Searching...
+            </>
+          ) : "Search"}
+        </button>
+
+        {singleResult && (
+          <div className="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900 mb-3">Search Result</h3>
+            <div className="bg-white p-4 rounded border border-gray-200 overflow-x-auto">
+              <pre className="text-sm text-gray-800">{JSON.stringify(singleResult, null, 2)}</pre>
+            </div>
+          </div>
+        )}
+
+        {progress && !loading && !singleResult && (
+          <div className="mt-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
+            {progress}
+          </div>
+        )}
+      </div>
+    </div>
+  ) : (
+    <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Excel File Upload</label>
+          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+            <div className="space-y-1 text-center">
+              <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <div className="flex text-sm text-gray-600">
+                <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                  <span>Upload a file</span>
+                  <input 
+                    type="file" 
+                    accept=".xlsx,.xls,.csv" 
+                    onChange={handleFileChange} 
+                    className="sr-only" 
                   />
-                </div>
-              </label>
+                </label>
+                <p className="pl-1">or drag and drop</p>
+              </div>
+              <p className="text-xs text-gray-500">
+                {selectedFile ? selectedFile.name : "XLSX, XLS, or CSV up to 10MB"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={handleBulkUpload}
+          disabled={loading || !selectedFile}
+          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:bg-purple-300 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Processing...
+            </>
+          ) : "Process File"}
+        </button>
+
+        {loading && (
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>{progress}</span>
+              <span>{progressPercent}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div 
+                className="bg-purple-600 h-2.5 rounded-full" 
+                style={{ width: `${progressPercent}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
+
+        {!loading && finalResults && (
+          <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-green-800">Results Ready</h3>
+                <p className="text-sm text-green-600">Found {finalResults.length} matching records</p>
+              </div>
               <button
-                onClick={handleBulkUpload}
-                disabled={loading || !selectedFile}
-                className="bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-purple-700 transition disabled:bg-purple-300"
+                onClick={handleDownloadCSV}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
-                {loading ? "Processing..." : "Upload"}
+                <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+                Download CSV
               </button>
             </div>
           </div>
+        )}
 
-          {loading && (
-            <div className="mt-4 space-y-2">
-              <p className="text-gray-700 font-medium">{progress}</p>
-              <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-purple-400 to-purple-600 transition-all duration-200"
-                  style={{ width: `${progressPercent}%` }}
-                ></div>
-              </div>
-              <p className="text-sm text-gray-500">{progressPercent}% complete</p>
-            </div>
-          )}
-
-          {!loading && finalResults && (
-            <div className="bg-green-50 p-4 rounded-lg border border-green-100 mt-4">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-green-800">
-                  Found {finalResults.length} results
-                </span>
-                <button
-                  onClick={handleDownloadCSV}
-                  className="bg-green-600 text-white font-semibold py-1 px-3 rounded-lg hover:bg-green-700 transition text-sm"
-                >
-                  <span className="before:content-['⬇️'] before:mr-1">Download CSV</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {!loading && progress && !finalResults && (
-            <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100 text-yellow-800">
-              {progress}
-            </div>
-          )}
-        </div>
-      )}
+        {!loading && progress && !finalResults && (
+          <div className="p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
+            {progress}
+          </div>
+        )}
+      </div>
     </div>
+  )}
+</div>
   );
 };
 
