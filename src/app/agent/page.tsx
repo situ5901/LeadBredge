@@ -10,29 +10,29 @@ import {
 export default function MemberDashboard() {
   const stats = [
     {
-      label: "Data Sent",
-      value: "1,050",
+      label: "Total amount",
+      value: "1100000",
       icon: <Send className="w-6 h-6 text-blue-600" />,
     },
     {
-      label: "Disbursed",
-      value: "785",
+      label: "Disbursed Case",
+      value: "20",
       icon: <CheckCircle className="w-6 h-6 text-green-600" />,
     },
     {
-      label: "Rejected",
+      label: "Rejected Case",
       value: "120",
       icon: <XCircle className="w-6 h-6 text-red-600" />,
     },
     {
-      label: "Leads",
-      value: "235",
+      label: "Target Left",
+      value: "1900000",
       icon: <Users className="w-6 h-6 text-yellow-600" />,
     },
   ];
 
   return (
-    <div className="bg-gray-100 p-6 min-h-screen">
+    <div className=" grid ">
       <h1 className="text-4xl font-bold text-gray-800 mb-10 text-center">
         Agent Dashboard
       </h1>

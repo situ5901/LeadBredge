@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Toaster } from 'react-hot-toast';
-import { Menu, X, LayoutDashboard, Users, Clock, LogOut, BadgeCheck, UserCog, Globe ,Merge} from "lucide-react";
+import { Menu, X, LayoutDashboard, Users, Clock, LogOut, BadgeCheck, UserCog, Globe, Merge } from "lucide-react";
 
 
 export default function AdminPanelLayout({
@@ -14,6 +14,18 @@ export default function AdminPanelLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const checkTokenAndRole = () => {
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
+
+      if (!token || role !== "superadmin") {
+        router.push("/");
+      }
+    };
+    checkTokenAndRole();
+  }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -31,8 +43,8 @@ export default function AdminPanelLayout({
     router.prefetch("/superadmin/Agents");
     router.prefetch("/superadmin/lenderstatus");
     router.prefetch("/superadmin/workupdate");
-     router.prefetch("/superadmin/Find-by-Phone");
-       router.prefetch("/superadmin/dedupe-check");
+    router.prefetch("/superadmin/Find-by-Phone");
+    router.prefetch("/superadmin/dedupe-check");
   }, [router]);
 
   return (
@@ -85,14 +97,14 @@ export default function AdminPanelLayout({
 
               <li>
                 <Link
-                  href="/superadmin/Members"
-                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${pathname === "/superadmin/member"
+                  href="/superadmin/Partners"
+                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${pathname === "/superadmin/Partners"
                     ? "bg-gray-700 text-white"
                     : "text-gray-300 hover:bg-gray-700 hover:text-white"
                     }`}
                 >
                   <Users className="w-5 h-5 mr-3" />
-                  Member Management
+                  Partner Management
                 </Link>
               </li>
               <li>
@@ -111,20 +123,20 @@ export default function AdminPanelLayout({
                 <Link
                   href="/superadmin/Find-by-Phone"
                   className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${pathname === "/superadmin/Find-by-Phone"
-                      ? "bg-gray-700 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    ? "bg-gray-700 text-white"
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
                     }`}
                 >
                   <Globe className="w-5 h-5 mr-3" />
                   Find User By Phone
                 </Link>
               </li>
-               <li>
+              <li>
                 <Link
                   href="/superadmin/dedupe-check"
                   className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${pathname === "/superadmin/dedupe-check"
-                      ? "bg-gray-700 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    ? "bg-gray-700 text-white"
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
                     }`}
                 >
                   <Merge className="w-5 h-5 mr-3" />

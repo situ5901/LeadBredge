@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 export default function Page() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [memberToDelete, setMemberToDelete] = useState<{name: string, email: string} | null>(null);
+  const [memberToDelete, setMemberToDelete] = useState<{ name: string, email: string } | null>(null);
   const [formData, setFormData] = useState({
     Membername: '',
     MemberMail: '',
@@ -65,8 +65,8 @@ export default function Page() {
     }
   };
 
-  const confirmDelete = (member: {Membername: string, MemberMail: string}) => {
-    setMemberToDelete({name: member.Membername, email: member.MemberMail});
+  const confirmDelete = (member: { Membername: string, MemberMail: string }) => {
+    setMemberToDelete({ name: member.Membername, email: member.MemberMail });
     setIsDeleteModalOpen(true);
   };
 
@@ -80,9 +80,9 @@ export default function Page() {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          Membername: memberToDelete.name, 
-          MemberMail: memberToDelete.email 
+        body: JSON.stringify({
+          Membername: memberToDelete.name,
+          MemberMail: memberToDelete.email
         }),
       });
 
@@ -185,7 +185,7 @@ export default function Page() {
               <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
                 Add New Partner
               </h2>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-gray-400 hover:text-gray-500"
               >
@@ -204,10 +204,11 @@ export default function Page() {
                   value={formData.Membername}
                   onChange={handleChange}
                   className="w-full border border-gray-200 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 placeholder-gray-400 text-sm sm:text-base"
+                  required
                 />
               </div>
               <div>
-              
+
                 <input
                   type="email"
                   name="MemberMail"
@@ -215,6 +216,7 @@ export default function Page() {
                   value={formData.MemberMail}
                   onChange={handleChange}
                   className="w-full border border-gray-200 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 placeholder-gray-400 text-sm sm:text-base"
+                  required
                 />
               </div>
               <div>
@@ -225,6 +227,7 @@ export default function Page() {
                   value={formData.MemberPassword}
                   onChange={handleChange}
                   className="w-full border border-gray-200 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 placeholder-gray-400 text-sm sm:text-base"
+                  required
                 />
               </div>
             </div>

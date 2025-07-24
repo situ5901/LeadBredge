@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -20,7 +20,7 @@ export default function LoginPage() {
         password: password,
       },
       role: "superadmin",
-      successMessage: "Welcome back, Admin!",
+      successMessage: "🪐 Superadmin detected ! Initiating full control for you.",
     },
     {
       url: "https://keshvacredit.com/api/v1/member/login",
@@ -30,7 +30,7 @@ export default function LoginPage() {
         MemberPassword: password,
       },
       role: "member",
-      successMessage: "Welcome, Partner!",
+      successMessage: "Welcome Partner! Your dashboard is ready to power your goals.",
     },
     {
       url: "https://keshvacredit.com/api/v1/agent/login",
@@ -40,7 +40,7 @@ export default function LoginPage() {
         AgentPassword: password,
       },
       role: "agent",
-      successMessage: "Welcome, Agent!",
+      successMessage: "Welcome Agent! Time to make a difference.",
     },
   ];
 
@@ -97,6 +97,21 @@ export default function LoginPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userRole = localStorage.getItem("role");
+
+    if (token && userRole) {
+      setTimeout(() => {
+        if (userRole === "superadmin") router.push("/superadmin");
+        else if (userRole === "member") router.push("/Partner");
+        else if (userRole === "agent") router.push("/agent");
+        else toast.error("Unknown role: " + userRole);
+        console.log("Redirecting to home page"  )
+      }, 2000);
+    }
+  }, [router]);
 
   return (
     <main className="min-h-screen bg-white flex items-center justify-center px-4">

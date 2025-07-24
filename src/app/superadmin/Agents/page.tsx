@@ -202,6 +202,7 @@ export default function Page() {
                   placeholder="Username"
                   value={formData.Agentname}
                   onChange={handleChange}
+                  required
                   className="w-full border border-gray-200 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 placeholder-gray-400 text-sm sm:text-base"
                 />
               </div>
@@ -212,6 +213,7 @@ export default function Page() {
                   placeholder="Email"
                   value={formData.AgentMail}
                   onChange={handleChange}
+                  required
                   className="w-full border border-gray-200 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 placeholder-gray-400 text-sm sm:text-base"
                 />
               </div>
@@ -222,6 +224,7 @@ export default function Page() {
                   placeholder="Set a password"
                   value={formData.AgentPassword}
                   onChange={handleChange}
+                  required
                   className="w-full border border-gray-200 p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 placeholder-gray-400 text-sm sm:text-base"
                 />
               </div>
@@ -244,8 +247,6 @@ export default function Page() {
           </div>
         </div>
       )}
-
-      {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && agentToDelete && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl animate-fadeIn">

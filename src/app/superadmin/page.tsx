@@ -4,35 +4,22 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
   BarChart, Bar, PieChart, Pie, Cell,
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  Legend, ResponsiveContainer, LineChart, Line
+  XAxis, YAxis, CartesianGrid, Tooltip,
+  Legend, ResponsiveContainer
 } from 'recharts';
 
 const LoanDashboard = () => {
-  const [userData, setUserData] = useState({
-    userCount: 0,
-    users2Count: 0,
-    totalUsers: 0,
-  });
-  const [analysisData, setAnalysisData] = useState({
-    validUsers: 0,
-    invalidUsers: 0,
-  });
-  const [portfolioStats, setPortfolioStats] = useState({
-    totalDocuments: 0,
-    duplicatePhoneCount: 0,
-  });
+  const [userData, setUserData] = useState({ userCount: 0, users2Count: 0, totalUsers: 0 });
+  const [analysisData, setAnalysisData] = useState({ validUsers: 0, invalidUsers: 0 });
+  const [portfolioStats, setPortfolioStats] = useState({ totalDocuments: 0, duplicatePhoneCount: 0 });
+  const [lenderStats, setLenderStats] = useState({});
   const [loading, setLoading] = useState(false);
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
-  // Fetch user data from API
+  // Fetch user-related data
   const fetchUserData = async () => {
-    if (!token) {
-      toast.error('No token found in localStorage.');
-      return;
-    }
-
+    if (!token) return toast.error('No token found in localStorage.');
     try {
       const res = await fetch('https://keshvacredit.com/api/v1/admin/get/all/users', {
         headers: { Authorization: `Bearer ${token}` },
@@ -44,26 +31,30 @@ const LoanDashboard = () => {
           users2Count: data.users2Count || 0,
           totalUsers: data.totalUsers || 0,
         });
-      } else {
-        toast.error(data.message || 'Failed to fetch user data.');
-      }
-    } catch {
-      toast.error('Error fetching user data');
+      } else toast.error(data.message || 'Failed to fetch user data.');
+    } catch (error) {
+      toast.error('Error fetching user data: ');
     }
   };
 
-  useEffect(() => {
-    fetchUserData();
-    fetchAnalysisData();
-    fetchPortfolioStats();
-  }, []);
+  const fetchLenderData = async () => {
+    if (!token) return toast.error('No token found in localStorage.');
+    try {
+      const res = await fetch('https://keshvacredit.com/api/v1/admin/get/LenderData', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const { success, message, ...lenderCounts } = data;
+        setLenderStats(lenderCounts);
+      } else toast.error(data.message || 'Failed to fetch lender data.');
+    } catch (error) {
+      toast.error('Error fetching lender data: ');
+    }
+  };
 
   const fetchAnalysisData = async () => {
-    if (!token) {
-      toast.error('No token found in localStorage.');
-      return;
-    }
-
+    if (!token) return toast.error('No token found in localStorage.');
     try {
       const res = await fetch('https://keshvacredit.com/api/v1/admin/analysis', {
         headers: { Authorization: `Bearer ${token}` },
@@ -74,20 +65,14 @@ const LoanDashboard = () => {
           validUsers: data.validUsers || 0,
           invalidUsers: data.invalidUsers || 0,
         });
-      } else {
-        toast.error(data.message || 'Failed to fetch analysis data.');
-      }
-    } catch {
-      toast.error('Error fetching analysis data');
+      } else toast.error(data.message || 'Failed to fetch analysis data.');
+    } catch (error) {
+      toast.error('Error fetching analysis data: ');
     }
   };
 
   const fetchPortfolioStats = async () => {
-    if (!token) {
-      toast.error('No token found in localStorage.');
-      return;
-    }
-
+    if (!token) return toast.error('No token found in localStorage.');
     try {
       const res = await fetch('https://keshvacredit.com/api/v1/admin/v1/filterdata', {
         headers: { Authorization: `Bearer ${token}` },
@@ -98,42 +83,41 @@ const LoanDashboard = () => {
           totalDocuments: data.totalDocuments || 0,
           duplicatePhoneCount: data.duplicatePhoneCount || 0,
         });
-      } else {
-        toast.error(data.message || 'Failed to fetch portfolio stats.');
-      }
-    } catch {
-      toast.error('Error fetching portfolio stats');
+      } else toast.error(data.message || 'Failed to fetch portfolio stats.');
+    } catch (error) {
+      toast.error('Error fetching portfolio stats: ');
     }
   };
 
   const handleDeleteData = async () => {
-    if (!token) {
-      toast.error('No token found in localStorage.');
-      return;
-    }
-
+    if (!token) return toast.error('No token found in localStorage.');
     setLoading(true);
     try {
       const res = await fetch('https://keshvacredit.com/api/v1/admin/v1/filterdata/delete', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
       });
       const data = await res.json();
       if (res.ok) {
         toast.success(data.message || 'Data deleted successfully');
-        fetchPortfolioStats(); // Refresh the stats after deletion
-      } else {
-        toast.error(data.message || 'Failed to delete data.');
-      }
-    } catch {
-      toast.error('Error deleting data');
+        fetchPortfolioStats();
+      } else toast.error(data.message || 'Failed to delete data.');
+    } catch (error) {
+      toast.error('Error deleting data: ');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchUserData();
+    fetchAnalysisData();
+    fetchPortfolioStats();
+    fetchLenderData();
+  }, [token]);
 
   const loanDistributionData = [
     { name: 'Web Users', value: userData.userCount },
@@ -144,6 +128,16 @@ const LoanDashboard = () => {
     { name: 'Total', value: portfolioStats.totalDocuments },
     { name: 'Duplicate', value: portfolioStats.duplicatePhoneCount },
   ];
+
+  const lenderTableData = Object.entries(lenderStats).map(([lenderName, totalLeads], index) => {
+    const safeTotal = Number(totalLeads) || 0;
+    return {
+      srNo: index + 1,
+      lender: lenderName.replace(/([A-Z])/g, ' $1').trim(),
+      total: safeTotal,
+      success: Math.floor(safeTotal * 0.8),
+    };
+  });
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -177,57 +171,69 @@ const LoanDashboard = () => {
             </p>
           </div>
         </div>
-        <div className="overflow-x-auto mt-8">
+        <div className="h-full mt-8">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Lender Lead Summary</h2>
-          <table className="min-w-full table-auto border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-            <thead className="bg-gray-100 text-gray-700 text-sm font-semibold">
-              <tr>
-                <th className="px-6 py-3 text-left">Sr. No</th>
-                <th className="px-6 py-3 text-left">Lender Name</th>
-                <th className="px-6 py-3 text-left">Total Leads Sent</th>
-                <th className="px-6 py-3 text-left">Successful Leads</th>
-                <th className="px-6 py-3 text-left">Dedupe Leads</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm text-gray-800 divide-y divide-gray-200">
-              {[
-                {
-                  lender: 'money view',
-                  total: 1200,
-                  success: 950,
-                  dedupe: 50,
-                },
-                {
-                  lender: 'Ramfin',
-                  total: 1100,
-                  success: 870,
-                  dedupe: 40,
-                },
-                {
-                  lender: 'olyv',
-                  total: 900,
-                  success: 780,
-                  dedupe: 30,
-                },
-              ].map((row, idx) => (
-                <tr
-                  key={idx}
-                  className="hover:bg-gray-50 transition-colors"
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Table */}
+            <div className="overflow-auto max-h-[400px] border border-gray-200 rounded-lg shadow-sm">
+              <table className="min-w-full table-auto">
+                <thead className="bg-gray-100 text-gray-700 text-sm font-semibold">
+                  <tr>
+                    <th className="px-6 py-3 text-left">Sr. No</th>
+                    <th className="px-6 py-3 text-left">Lender Name</th>
+                    <th className="px-6 py-3 text-left">Total Leads</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm text-gray-800 divide-y divide-gray-200">
+                  {lenderTableData.length > 0 ? (
+                    lenderTableData.map((row) => (
+                      <tr key={row.lender} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">{row.srNo}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{row.lender}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-blue-600 font-medium">
+                          {row.total.toLocaleString()}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
+                        No lender data available.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Bar Chart */}
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 h-[400px]">
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">Total Leads per Lender</h2>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={lenderTableData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">{idx + 1}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{row.lender}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{row.total.toLocaleString()}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-green-600 font-medium">
-                    {row.success.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-red-500 font-medium">
-                    {row.dedupe.toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="lender" angle={-25} textAnchor="end" height={60} interval={0} />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="total"
+                    name="Total Leads"
+                    fill="#4F46E5"
+                    radius={[8, 8, 0, 0]}
+                    barSize={40}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
+
+
 
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-5">
@@ -293,26 +299,19 @@ const LoanDashboard = () => {
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 lg:col-span-2">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Data management</h2>
             <div className="h-[300px] flex gap-4">
-              {/* Card 1 */}
               <div className="flex-1 bg-blue-50 p-6 rounded-2xl shadow-lg border border-blue-100 flex flex-col">
                 <h3 className="text-lg font-semibold text-blue-800 mb-4">📊 Duplicate Stats</h3>
-
-                {/* Small Boxes Row */}
                 <div className="flex gap-4 mb-6">
-                  {/* Total Data Box */}
                   <div className="flex-1 bg-gradient-to-br from-blue-100 to-blue-200 text-center rounded-xl p-4 h-24 flex flex-col justify-center shadow-sm border border-blue-200">
                     <p className="text-sm font-bold text-blue-900">Total Documents</p>
                     <p className="text-base font-medium text-blue-800 mt-1">{portfolioStats.totalDocuments.toLocaleString()}</p>
                   </div>
-
-                  {/* Duplicate Data Box */}
                   <div className="flex-1 bg-gradient-to-br from-yellow-100 to-yellow-200 text-center rounded-xl p-4 h-24 flex flex-col justify-center shadow-sm border border-yellow-200">
                     <p className="text-sm font-bold text-yellow-900">Duplicate Documents</p>
                     <p className="text-base font-medium text-yellow-800 mt-1">{portfolioStats.duplicatePhoneCount.toLocaleString()}</p>
                   </div>
                 </div>
 
-                {/* Centered Delete Button below the boxes */}
                 <div className="flex justify-center">
                   <button
                     onClick={handleDeleteData}
@@ -326,8 +325,6 @@ const LoanDashboard = () => {
                   </button>
                 </div>
               </div>
-
-              {/* Card 2 */}
               <div className="flex-1 bg-green-50 p-4 rounded-lg shadow-md border border-green-100">
                 <h3 className="text-md font-medium text-green-700 mb-2">Documents Overview</h3>
                 <div className="h-[220px]">
@@ -352,7 +349,6 @@ const LoanDashboard = () => {
                   </ResponsiveContainer>
                 </div>
               </div>
-
             </div>
           </div>
         </div>

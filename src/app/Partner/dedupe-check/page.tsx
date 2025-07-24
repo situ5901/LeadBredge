@@ -309,7 +309,6 @@ export default function PartnerDashboard() {
           )}
         </div>
 
-        {/* Progress Bar */}
         {processing && (
           <div className="mt-6 space-y-3">
             <div className="flex justify-between text-xs text-gray-500">
@@ -333,7 +332,6 @@ export default function PartnerDashboard() {
           </div>
         )}
 
-        {/* Upload Button */}
         <div className="mt-4 flex justify-center">
           <button
             onClick={handleUpload}
@@ -361,7 +359,6 @@ export default function PartnerDashboard() {
         )}
       </div>
 
-      {/* Results Summary */}
       {!processing && totalRows > 0 && (
         <div className="bg-gray-50 rounded-lg p-4">
           <h3 className="font-medium text-gray-700 mb-2">Results Summary</h3>
@@ -382,7 +379,6 @@ export default function PartnerDashboard() {
         </div>
       )}
 
-      {/* Download Buttons */}
       {!processing && phoneColumnIndex !== null && (duplicates.length > 0 || notDuplicates.length > 0) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="border border-red-100 bg-red-50 rounded-lg p-4">

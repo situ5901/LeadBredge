@@ -15,6 +15,18 @@ export default function MemberPanelLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userName, setUserName] = useState("User");
 
+    useEffect(() => {
+      const checkTokenAndRole = () => {
+        const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
+  
+        if (!token || role !== "member") {
+          router.push("/");
+        }
+      };
+      checkTokenAndRole();
+    }, [router]);
+
   const handleLogout = () => {
     localStorage.removeItem("role");
     localStorage.removeItem("userName");
