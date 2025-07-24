@@ -125,6 +125,7 @@ export default function MemberPanelLayout({
               >
                 <Menu size={24} />
               </button>
+
               <h1 className="text-xl font-semibold text-gray-800 capitalize">
                 {pathname.split("/").pop()?.replace("-", " ") || "Dashboard"}
               </h1>
@@ -132,9 +133,12 @@ export default function MemberPanelLayout({
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium text-sm">
+                <Link href="/agent/profile">
+                  <div className="w-9 h-9 rounded-full cursor-pointer bg-blue-500 flex items-center justify-center text-white font-medium text-sm">
+                    
                     {userName?.charAt(0).toUpperCase()}
                   </div>
+                  </Link>
                 </div>
                 <div className="hidden md:block">
                   <p className="text-sm font-medium text-gray-700">{userName}</p>
