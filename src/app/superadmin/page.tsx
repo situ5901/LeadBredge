@@ -7,6 +7,12 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer
 } from 'recharts';
+// Add this interface above your LoanDashboard component or in a types.ts file
+type RowData = {
+  srNo: number;
+  lenderName: string;
+  [key: string]: string | number;
+};
 
 const LoanDashboard = () => {
   const [userData, setUserData] = useState({ userCount: 0, users2Count: 0, totalUsers: 0 });
@@ -14,6 +20,12 @@ const LoanDashboard = () => {
   const [portfolioStats, setPortfolioStats] = useState({ totalDocuments: 0, duplicatePhoneCount: 0 });
   const [lenderStats, setLenderStats] = useState({});
   const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState({
+    userData: true,
+    analysisData: true,
+    portfolioStats: true,
+    lenderStats: true
+  });
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
@@ -34,6 +46,8 @@ const LoanDashboard = () => {
       } else toast.error(data.message || 'Failed to fetch user data.');
     } catch (error) {
       toast.error('Error fetching user data: ');
+    } finally {
+      setIsLoading(prev => ({ ...prev, userData: false }));
     }
   };
 
@@ -45,11 +59,12 @@ const LoanDashboard = () => {
       });
       const data = await res.json();
       if (res.ok) {
-        const { success, message, ...lenderCounts } = data;
-        setLenderStats(lenderCounts);
+        setLenderStats(data.lender || {});
       } else toast.error(data.message || 'Failed to fetch lender data.');
     } catch (error) {
       toast.error('Error fetching lender data: ');
+    } finally {
+      setIsLoading(prev => ({ ...prev, lenderStats: false }));
     }
   };
 
@@ -68,6 +83,8 @@ const LoanDashboard = () => {
       } else toast.error(data.message || 'Failed to fetch analysis data.');
     } catch (error) {
       toast.error('Error fetching analysis data: ');
+    } finally {
+      setIsLoading(prev => ({ ...prev, analysisData: false }));
     }
   };
 
@@ -86,6 +103,8 @@ const LoanDashboard = () => {
       } else toast.error(data.message || 'Failed to fetch portfolio stats.');
     } catch (error) {
       toast.error('Error fetching portfolio stats: ');
+    } finally {
+      setIsLoading(prev => ({ ...prev, portfolioStats: false }));
     }
   };
 
@@ -129,114 +148,148 @@ const LoanDashboard = () => {
     { name: 'Duplicate', value: portfolioStats.duplicatePhoneCount },
   ];
 
-  const lenderTableData = Object.entries(lenderStats).map(([lenderName, totalLeads], index) => {
-    const safeTotal = Number(totalLeads) || 0;
+  // Refactor lenderTableData to display all values for a lender in one row
+  const lenderTableData = Object.entries(lenderStats).map(([lenderName, lenderData], index) => {
+    // Ensure lenderData is an object before spreading
+    const dataToSpread = typeof lenderData === 'object' && lenderData !== null ? lenderData : {};
     return {
       srNo: index + 1,
-      lender: lenderName.replace(/([A-Z])/g, ' $1').trim(),
-      total: safeTotal,
-      success: Math.floor(safeTotal * 0.8),
+      lenderName: lenderName,
+      ...dataToSpread,
     };
   });
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   return (
-    <div className="bg-gray-50 p-4 md:p-8">
+    <div className="bg-gray-50">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 md:mb-8">Dashboard</h1>
+
+        {/* Stats Grid with Loading States */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 md:mb-8">
+          {/* Total Users */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-gray-500 text-sm font-bold">Total Users</h3>
-            <p className="text-2xl font-bold text-blue-400">{userData.totalUsers.toLocaleString()}</p>
+            {isLoading.userData ? (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+              </div>
+            ) : (
+              <p className="text-2xl font-bold text-blue-400">{userData.totalUsers.toLocaleString()}</p>
+            )}
           </div>
+
+          {/* Old Users */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-gray-500 text-sm font-bold">Old Users</h3>
-            <p className="text-2xl font-bold text-pink-600">{(userData.users2Count).toLocaleString()}</p>
+            {isLoading.userData ? (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
+              </div>
+            ) : (
+              <p className="text-2xl font-bold text-pink-600">{userData.users2Count.toLocaleString()}</p>
+            )}
           </div>
+
+          {/* Website Users */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-gray-500 text-sm font-bold">Website Users</h3>
-            <p className="text-2xl font-bold text-green-600">{userData.userCount.toLocaleString()}</p>
+            {isLoading.userData ? (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              </div>
+            ) : (
+              <p className="text-2xl font-bold text-green-600">{userData.userCount.toLocaleString()}</p>
+            )}
           </div>
+
+          {/* Valid Users */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-gray-500 text-sm font-bold">Valid Users</h3>
-            <p className="text-2xl font-bold text-amber-500">
-              {analysisData.validUsers.toLocaleString()}
-            </p>
+            {isLoading.analysisData ? (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+              </div>
+            ) : (
+              <p className="text-2xl font-bold text-amber-500">
+                {analysisData.validUsers.toLocaleString()}
+              </p>
+            )}
           </div>
+
+          {/* Invalid Users */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-gray-500 text-sm font-bold">Invalid Users</h3>
-            <p className="text-2xl font-bold text-amber-500">
-              {analysisData.invalidUsers.toLocaleString()}
-            </p>
+            {isLoading.analysisData ? (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+              </div>
+            ) : (
+              <p className="text-2xl font-bold text-amber-500">
+                {analysisData.invalidUsers.toLocaleString()}
+              </p>
+            )}
           </div>
         </div>
+
+        {/* Lender Data Section */}
         <div className="h-full mt-8">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Lender Lead Summary</h2>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Table */}
-            <div className="overflow-auto max-h-[400px] border border-gray-200 rounded-lg shadow-sm">
-              <table className="min-w-full table-auto">
-                <thead className="bg-gray-100 text-gray-700 text-sm font-semibold">
+          {/* Full-width Table */}
+          <div className="overflow-auto border border-gray-200 rounded-lg shadow-sm bg-white">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Sr. No</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Lender Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Leads sent</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Leads total</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Leads rejected</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {isLoading.lenderStats ? (
                   <tr>
-                    <th className="px-6 py-3 text-left">Sr. No</th>
-                    <th className="px-6 py-3 text-left">Lender Name</th>
-                    <th className="px-6 py-3 text-left">Total Leads</th>
+                    <td colSpan={100} className="px-6 py-4 text-center"> {/* Use a large colspan to cover all columns */}
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="text-sm text-gray-800 divide-y divide-gray-200">
-                  {lenderTableData.length > 0 ? (
-                    lenderTableData.map((row) => (
-                      <tr key={row.lender} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap">{row.srNo}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{row.lender}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-blue-600 font-medium">
-                          {row.total.toLocaleString()}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
-                        No lender data available.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                ) : lenderTableData.length > 0 ? (
+                  lenderTableData.map((row) => (
+                    <tr key={row.lenderName} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.srNo}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{row.lenderName}</td>
+                      {Object.keys(row)
+                        .filter(key => key !== 'srNo' && key !== 'lenderName')
+                        .map(key => (
+                          <td
+                            key={`${row.lenderName}-${key}`}
+                            className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium"
+                          >
+                            {Number((row as Record<string, any>)[key]).toLocaleString()}
+                          </td>
+                        ))}
 
-            {/* Bar Chart */}
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 h-[400px]">
-              <h2 className="text-lg font-semibold text-gray-700 mb-4">Total Leads per Lender</h2>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={lenderTableData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="lender" angle={-25} textAnchor="end" height={60} interval={0} />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar
-                    dataKey="total"
-                    name="Total Leads"
-                    fill="#4F46E5"
-                    radius={[8, 8, 0, 0]}
-                    barSize={40}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={100} className="px-6 py-4 text-center text-sm text-gray-500">
+                      No lender data available.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
-
-
         {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           {/* Chart 1: User Distribution Pie Chart */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">User Distribution</h2>
@@ -266,6 +319,7 @@ const LoanDashboard = () => {
             </div>
           </div>
 
+          {/* Chart 2: User Validation Bar Chart */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">User Validation Summary</h2>
             <div className="h-[300px]">
@@ -294,8 +348,7 @@ const LoanDashboard = () => {
             </div>
           </div>
 
-
-          {/* Chart 5: Portfolio Growth Area Chart */}
+          {/* Data Management Section */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 lg:col-span-2">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Data management</h2>
             <div className="h-[300px] flex gap-4">
@@ -304,19 +357,35 @@ const LoanDashboard = () => {
                 <div className="flex gap-4 mb-6">
                   <div className="flex-1 bg-gradient-to-br from-blue-100 to-blue-200 text-center rounded-xl p-4 h-24 flex flex-col justify-center shadow-sm border border-blue-200">
                     <p className="text-sm font-bold text-blue-900">Total Documents</p>
-                    <p className="text-base font-medium text-blue-800 mt-1">{portfolioStats.totalDocuments.toLocaleString()}</p>
+                    {isLoading.portfolioStats ? (
+                      <div className="flex justify-center mt-1">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                      </div>
+                    ) : (
+                      <p className="text-base font-medium text-blue-800 mt-1">
+                        {portfolioStats.totalDocuments.toLocaleString()}
+                      </p>
+                    )}
                   </div>
                   <div className="flex-1 bg-gradient-to-br from-yellow-100 to-yellow-200 text-center rounded-xl p-4 h-24 flex flex-col justify-center shadow-sm border border-yellow-200">
                     <p className="text-sm font-bold text-yellow-900">Duplicate Documents</p>
-                    <p className="text-base font-medium text-yellow-800 mt-1">{portfolioStats.duplicatePhoneCount.toLocaleString()}</p>
+                    {isLoading.portfolioStats ? (
+                      <div className="flex justify-center mt-1">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-500"></div>
+                      </div>
+                    ) : (
+                      <p className="text-base font-medium text-yellow-800 mt-1">
+                        {portfolioStats.duplicatePhoneCount.toLocaleString()}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex justify-center">
                   <button
                     onClick={handleDeleteData}
-                    disabled={loading}
-                    className={`w-48 h-12 text-sm font-semibold rounded-xl transition-all duration-200 ${loading
+                    disabled={loading || isLoading.portfolioStats}
+                    className={`w-48 h-12 text-sm font-semibold rounded-xl transition-all duration-200 ${loading || isLoading.portfolioStats
                       ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
                       : 'bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg'
                       }`}
@@ -356,5 +425,4 @@ const LoanDashboard = () => {
     </div>
   );
 };
-
 export default LoanDashboard;
