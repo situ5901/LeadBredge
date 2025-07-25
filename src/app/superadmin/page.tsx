@@ -7,7 +7,6 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer
 } from 'recharts';
-// Add this interface above your LoanDashboard component or in a types.ts file
 type RowData = {
   srNo: number;
   lenderName: string;
@@ -28,8 +27,6 @@ const LoanDashboard = () => {
   });
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-
-  // Fetch user-related data
   const fetchUserData = async () => {
     if (!token) return toast.error('No token found in localStorage.');
     try {
@@ -148,9 +145,7 @@ const LoanDashboard = () => {
     { name: 'Duplicate', value: portfolioStats.duplicatePhoneCount },
   ];
 
-  // Refactor lenderTableData to display all values for a lender in one row
   const lenderTableData = Object.entries(lenderStats).map(([lenderName, lenderData], index) => {
-    // Ensure lenderData is an object before spreading
     const dataToSpread = typeof lenderData === 'object' && lenderData !== null ? lenderData : {};
     return {
       srNo: index + 1,
@@ -164,11 +159,9 @@ const LoanDashboard = () => {
   return (
     <div className="bg-gray-50">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 md:mb-8">Dashboard</h1>
+        <h1 className="text-2xl md:text-2xl font-bold text-gray-800 mb-2">Dashboard</h1>
 
-        {/* Stats Grid with Loading States */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 md:mb-8">
-          {/* Total Users */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-gray-500 text-sm font-bold">Total Users</h3>
             {isLoading.userData ? (
@@ -180,7 +173,6 @@ const LoanDashboard = () => {
             )}
           </div>
 
-          {/* Old Users */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-gray-500 text-sm font-bold">Old Users</h3>
             {isLoading.userData ? (
@@ -192,7 +184,6 @@ const LoanDashboard = () => {
             )}
           </div>
 
-          {/* Website Users */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-gray-500 text-sm font-bold">Website Users</h3>
             {isLoading.userData ? (
@@ -204,7 +195,6 @@ const LoanDashboard = () => {
             )}
           </div>
 
-          {/* Valid Users */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-gray-500 text-sm font-bold">Valid Users</h3>
             {isLoading.analysisData ? (
@@ -218,7 +208,6 @@ const LoanDashboard = () => {
             )}
           </div>
 
-          {/* Invalid Users */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h3 className="text-gray-500 text-sm font-bold">Invalid Users</h3>
             {isLoading.analysisData ? (
@@ -233,11 +222,8 @@ const LoanDashboard = () => {
           </div>
         </div>
 
-        {/* Lender Data Section */}
         <div className="h-full mt-8">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Lender Lead Summary</h2>
-
-          {/* Full-width Table */}
           <div className="overflow-auto border border-gray-200 rounded-lg shadow-sm bg-white">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-100">
@@ -252,7 +238,7 @@ const LoanDashboard = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {isLoading.lenderStats ? (
                   <tr>
-                    <td colSpan={100} className="px-6 py-4 text-center"> {/* Use a large colspan to cover all columns */}
+                    <td colSpan={100} className="px-6 py-4 text-center"> 
                       <div className="flex justify-center py-8">
                         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
                       </div>
@@ -290,7 +276,6 @@ const LoanDashboard = () => {
 
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          {/* Chart 1: User Distribution Pie Chart */}
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">User Distribution</h2>
             <div className="h-[300px]">

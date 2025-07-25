@@ -143,8 +143,6 @@ export default function AdminPanelLayout({
                   dedupe-check
                 </Link>
               </li>
-
-
               <li>
                 <Link
                   href="/superadmin/lenderstatus"
@@ -157,8 +155,6 @@ export default function AdminPanelLayout({
                   Lender Status
                 </Link>
               </li>
-
-
               <li>
                 <Link
                   href="/superadmin/workupdate"
