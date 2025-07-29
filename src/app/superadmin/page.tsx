@@ -2,22 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import Lenderdata from "./dashboardsection/page1"
 import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer
 } from 'recharts';
-type RowData = {
-  srNo: number;
-  lenderName: string;
-  [key: string]: string | number;
-};
 
 const LoanDashboard = () => {
   const [userData, setUserData] = useState({ userCount: 0, users2Count: 0, totalUsers: 0 });
   const [analysisData, setAnalysisData] = useState({ validUsers: 0, invalidUsers: 0 });
   const [portfolioStats, setPortfolioStats] = useState({ totalDocuments: 0, duplicatePhoneCount: 0 });
-  const [lenderStats, setLenderStats] = useState({});
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState({
     userData: true,
@@ -45,23 +40,6 @@ const LoanDashboard = () => {
       toast.error('Error fetching user data: ');
     } finally {
       setIsLoading(prev => ({ ...prev, userData: false }));
-    }
-  };
-
-  const fetchLenderData = async () => {
-    if (!token) return toast.error('No token found in localStorage.');
-    try {
-      const res = await fetch('https://keshvacredit.com/api/v1/admin/get/LenderData', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setLenderStats(data.lender || {});
-      } else toast.error(data.message || 'Failed to fetch lender data.');
-    } catch (error) {
-      toast.error('Error fetching lender data: ');
-    } finally {
-      setIsLoading(prev => ({ ...prev, lenderStats: false }));
     }
   };
 
@@ -132,7 +110,6 @@ const LoanDashboard = () => {
     fetchUserData();
     fetchAnalysisData();
     fetchPortfolioStats();
-    fetchLenderData();
   }, [token]);
 
   const loanDistributionData = [
@@ -145,14 +122,6 @@ const LoanDashboard = () => {
     { name: 'Duplicate', value: portfolioStats.duplicatePhoneCount },
   ];
 
-  const lenderTableData = Object.entries(lenderStats).map(([lenderName, lenderData], index) => {
-    const dataToSpread = typeof lenderData === 'object' && lenderData !== null ? lenderData : {};
-    return {
-      srNo: index + 1,
-      lenderName: lenderName,
-      ...dataToSpread,
-    };
-  });
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -221,58 +190,11 @@ const LoanDashboard = () => {
             )}
           </div>
         </div>
+        <section>
+          <Lenderdata />
 
-        <div className="h-full mt-8">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Lender Lead Summary</h2>
-          <div className="overflow-auto border border-gray-200 rounded-lg shadow-sm bg-white">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Sr. No</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Lender Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Leads sent</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Leads total</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Leads rejected</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {isLoading.lenderStats ? (
-                  <tr>
-                    <td colSpan={100} className="px-6 py-4 text-center"> 
-                      <div className="flex justify-center py-8">
-                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : lenderTableData.length > 0 ? (
-                  lenderTableData.map((row) => (
-                    <tr key={row.lenderName} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.srNo}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{row.lenderName}</td>
-                      {Object.keys(row)
-                        .filter(key => key !== 'srNo' && key !== 'lenderName')
-                        .map(key => (
-                          <td
-                            key={`${row.lenderName}-${key}`}
-                            className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium"
-                          >
-                            {Number((row as Record<string, any>)[key]).toLocaleString()}
-                          </td>
-                        ))}
+        </section>
 
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={100} className="px-6 py-4 text-center text-sm text-gray-500">
-                      No lender data available.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
 
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">

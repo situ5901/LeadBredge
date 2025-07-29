@@ -13,9 +13,13 @@ export default function Page() {
     MemberPassword: '',
   });
   const [members, setMembers] = useState([]);
+  const [isLoadingMembers, setIsLoadingMembers] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
   const fetchMembers = async () => {
+    setIsLoadingMembers(true);
     try {
       const res = await fetch('https://keshvacredit.com/api/v1/member/getMamber', {
         headers: { Authorization: `Bearer ${token}` },
@@ -24,6 +28,8 @@ export default function Page() {
       if (res.ok) setMembers(data);
     } catch {
       toast.error('Error fetching members');
+    } finally {
+      setIsLoadingMembers(false);
     }
   };
 
@@ -40,6 +46,15 @@ export default function Page() {
       toast.error('No token found in localStorage.');
       return;
     }
+
+    const { Membername, MemberMail, MemberPassword } = formData;
+
+    if (!Membername.trim() || !MemberMail.trim() || !MemberPassword.trim()) {
+      toast.error('All fields are required.');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       const res = await fetch('https://keshvacredit.com/api/v1/admin/create/member', {
@@ -62,6 +77,8 @@ export default function Page() {
       }
     } catch {
       toast.error('Something went wrong.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -126,54 +143,55 @@ export default function Page() {
       </div>
 
       <div className="space-y-4 sm:space-y-6">
-        {members.map((member: any, index: number) => (
-          <div key={member._id} className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-            <span className="text-lg sm:text-2xl font-bold text-gray-700 w-10 sm:w-12 mb-2 sm:mb-0 shrink-0">
-              {index + 1}.
-            </span>
-            <div className="flex-1 bg-white rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-md transition-all duration-300 border border-gray-100 w-full">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
-                <div className="flex items-center space-x-3 sm:space-x-4">
-                  <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-lg sm:text-xl font-semibold">
-                    {getInitials(member.Membername)}
-                  </div>
-                  <div>
-                    <h2 className="text-lg sm:text-xl font-semibold text-gray-800">{member.Membername}</h2>
-                    <p className="text-sm text-gray-500 truncate">{member.MemberMail}</p>
+        {isLoadingMembers ? (
+          <div className="text-center py-10 bg-white rounded-lg shadow-sm w-full">
+            <svg className="animate-spin mx-auto h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            <p className="mt-2 text-gray-500 text-sm">Fetching partners...</p>
+          </div>
+        ) : (
+          <>
+            {members.map((member: any, index: number) => (
+              <div key={member._id} className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+                <span className="text-lg sm:text-2xl font-bold text-gray-700 w-10 sm:w-12 mb-2 sm:mb-0 shrink-0">
+                  {index + 1}.
+                </span>
+                <div className="flex-1 bg-white rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-md transition-all duration-300 border border-gray-100 w-full">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div className="flex items-center space-x-3 sm:space-x-4">
+                      <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-lg sm:text-xl font-semibold">
+                        {getInitials(member.Membername)}
+                      </div>
+                      <div>
+                        <h2 className="text-lg sm:text-xl font-semibold text-gray-800">{member.Membername}</h2>
+                        <p className="text-sm text-gray-500 truncate">{member.MemberMail}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => confirmDelete(member)}
+                      className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg text-xs font-medium shadow-sm transition-colors duration-200 self-end sm:self-center flex items-center"
+                    >
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Delete
+                    </button>
                   </div>
                 </div>
-                <button
-                  onClick={() => confirmDelete(member)}
-                  className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg text-xs font-medium shadow-sm transition-colors duration-200 self-end sm:self-center flex items-center"
-                >
-                  <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                  Delete
-                </button>
               </div>
-            </div>
-          </div>
-        ))}
-        {members.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-lg shadow-sm w-full">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <h3 className="mt-4 text-lg font-medium text-gray-700">No partners found</h3>
-            <p className="mt-1 text-gray-500">Add your first partner by clicking the button above</p>
-          </div>
+            ))}
+            {members.length === 0 && (
+              <div className="text-center py-12 bg-white rounded-lg shadow-sm w-full">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <h3 className="mt-4 text-lg font-medium text-gray-700">No partners found</h3>
+                <p className="mt-1 text-gray-500">Add your first partner by clicking the button above</p>
+              </div>
+            )}
+          </>
         )}
       </div>
 

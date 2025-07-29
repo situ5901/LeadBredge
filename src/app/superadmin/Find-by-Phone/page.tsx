@@ -221,12 +221,36 @@ const FilterUploadPage = () => {
         </button>
 
         {singleResult && (
-          <div className="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 mb-3">Search Result</h3>
-            <div className="bg-white p-4 rounded border border-gray-200 overflow-x-auto">
-              <pre className="text-sm text-gray-800">{JSON.stringify(singleResult, null, 2)}</pre>
-            </div>
-          </div>
+         <div className="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
+  <h3 className="text-lg font-medium text-gray-900 mb-3">Search Result</h3>
+  <div className="bg-white p-4 rounded border border-gray-200 overflow-x-auto">
+    {singleResult && typeof singleResult === 'object' ? (
+      <table className="min-w-full text-sm text-left text-gray-800">
+        <tbody>
+          {Object.entries(singleResult).map(([key, value]) => (
+            <tr key={key} className="border-b last:border-none">
+              <th className="pr-4 py-2 font-semibold capitalize whitespace-nowrap text-gray-700">
+                {key.replace(/_/g, ' ')}
+              </th>
+              <td className="py-2">
+                {typeof value === 'object' ? (
+                  <pre className="whitespace-pre-wrap text-xs text-gray-600">
+                    {JSON.stringify(value, null, 2)}
+                  </pre>
+                ) : (
+                  value?.toString()
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ) : (
+      <p className="text-sm text-gray-500">No result found.</p>
+    )}
+  </div>
+</div>
+
         )}
 
         {progress && !loading && !singleResult && (

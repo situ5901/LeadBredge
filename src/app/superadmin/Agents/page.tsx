@@ -110,7 +110,7 @@ export default function Page() {
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6   max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
         <h1 className="text-xl sm:text-xl font-bold text-gray-800">Agent Management</h1>
         <button
