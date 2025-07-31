@@ -65,11 +65,13 @@ export default function AdminPanelLayout({
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <Link href="/superadmin/dashboard" className="flex items-center space-x-2">
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-                Admin
-              </span>
-            </Link>
+           <Link href="/superadmin/dashboard" className="flex items-center space-x-2">
+  <img
+    src="https://i.postimg.cc/bJvYS7Lx/logo.webp"
+    alt="Logo"
+    className="h-10 w-40 "
+  />
+</Link>
             <button
               className="md:hidden text-gray-400 hover:text-white"
               onClick={toggleSidebar}
