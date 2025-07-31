@@ -55,9 +55,8 @@ export default function MemberDashboard() {
         ))}
       </div>
 
-      <div className=" bg-white rounded-2xl shadow text-center">
+      <div className="  text-center">
        <Dedupe/>
-
       </div>
     </div>
   );

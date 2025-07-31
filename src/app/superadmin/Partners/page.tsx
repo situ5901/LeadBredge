@@ -158,10 +158,10 @@ export default function Page() {
                 <span className="text-lg sm:text-2xl font-bold text-gray-700 w-10 sm:w-12 mb-2 sm:mb-0 shrink-0">
                   {index + 1}.
                 </span>
-                <div className="flex-1 bg-white rounded-2xl shadow-sm p-4 sm:p-6 hover:shadow-md transition-all duration-300 border border-gray-100 w-full">
+                <div className="flex-1 bg-white rounded-2xl shadow-sm p-2 sm:p-2 hover:shadow-md transition-all duration-300 border border-gray-100 w-full">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
                     <div className="flex items-center space-x-3 sm:space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-lg sm:text-xl font-semibold">
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-lg sm:text-xl font-semibold">
                         {getInitials(member.Membername)}
                       </div>
                       <div>

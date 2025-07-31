@@ -187,8 +187,8 @@ const FilterUploadPage = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 mb-5 shadow-lg rounded-xl bg-white">
-      <h1 className="text-3xl font-bold mb-6 text-center text-blue-800">
+    <div className="max-w-2xl mx-auto  p-6 mb-5 ">
+      <h1 className="text-2xl font-bold mb-6 text-center text-blue-800">
         Lead Status Checker Moneyview
       </h1>
 

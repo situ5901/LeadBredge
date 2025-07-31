@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Toaster } from "react-hot-toast";
-import { Menu, X, LayoutDashboard, Send, LogOut } from "lucide-react";
+import { Menu, X, LayoutDashboard, LogOut } from "lucide-react";
 
 export default function MemberPanelLayout({
   children,
@@ -15,17 +15,17 @@ export default function MemberPanelLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userName, setUserName] = useState("User");
 
-    useEffect(() => {
-      const checkTokenAndRole = () => {
-        const token = localStorage.getItem("token");
-        const role = localStorage.getItem("role");
-  
-        if (!token || role !== "member") {
-          router.push("/");
-        }
-      };
-      checkTokenAndRole();
-    }, [router]);
+  useEffect(() => {
+    const checkTokenAndRole = () => {
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
+
+      if (!token || role !== "member") {
+        router.push("/");
+      }
+    };
+    checkTokenAndRole();
+  }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem("role");
@@ -85,8 +85,8 @@ export default function MemberPanelLayout({
                 <Link
                   href="/Partner/"
                   className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${pathname === "/Partner/"
-                      ? "bg-gray-700 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    ? "bg-gray-700 text-white"
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
                     }`}
                 >
                   <LayoutDashboard className="w-5 h-5 mr-3" />

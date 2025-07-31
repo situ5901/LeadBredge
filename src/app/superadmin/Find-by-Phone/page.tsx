@@ -142,18 +142,18 @@ const FilterUploadPage = () => {
   }
 
   return (
-   <div className="max-w-2xl mx-auto p-6 mb-5">
+   <div className="max-w-2xl mx-auto ">
   <div className="text-center mb-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-2">
       <span className="relative">
-        <span className="absolute left-0 top-0 -ml-6 -mt-1 text-2xl"></span>
+        <span className="absolute left-0 top-0 -ml-6 -mt-1 text-xl"></span>
         Phone Number Lookup
       </span>
     </h1>
     <p className="text-gray-600">Search by single phone number or upload an Excel file</p>
   </div>
   
-  <div className="flex justify-center mb-8">
+  <div className="flex justify-center mb-4">
     <div className="inline-flex rounded-md shadow-sm" role="group">
       <button
         onClick={() => setSearchMode("phone")}
