@@ -31,6 +31,8 @@ export default function MemberPanelLayout({
   const handleLogout = () => {
     localStorage.removeItem("role");
     localStorage.removeItem("userName");
+      localStorage.removeItem("email");
+       localStorage.removeItem("phone");
     router.push("/");
   };
 

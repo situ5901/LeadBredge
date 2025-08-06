@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Toaster } from 'react-hot-toast';
 import { Menu, X, LayoutDashboard, Users, Clock, LogOut, BadgeCheck, UserCog, Globe, Merge } from "lucide-react";
+import Image from "next/image";
 
 
 export default function AdminPanelLayout({
@@ -65,13 +66,15 @@ export default function AdminPanelLayout({
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-700">
-           <Link href="/superadmin/dashboard" className="flex items-center space-x-2">
-  <img
-    src="https://i.postimg.cc/bJvYS7Lx/logo.webp"
-    alt="Logo"
-    className="h-10 w-40 "
-  />
-</Link>
+            <Link href="/superadmin/dashboard" className="flex items-center space-x-2">
+              <Image
+                src="https://i.postimg.cc/bJvYS7Lx/logo.webp"
+                alt="Logo"
+                width={160}
+                height={40}
+                className="h-10 w-40 object-contain"
+              />
+            </Link>
             <button
               className="md:hidden text-gray-400 hover:text-white"
               onClick={toggleSidebar}

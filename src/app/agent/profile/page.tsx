@@ -11,19 +11,16 @@ const Profile = () => {
 
   const [isEditing, setIsEditing] = useState(false);
 
+  // Load each field separately from localStorage
   useEffect(() => {
-    const storedUser = localStorage.getItem("userName");
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setFormData(parsedUser);
-      } catch (error) {
-        setFormData({ name: storedUser, email: "", phone: "" });
-      }
-    }
+    const name = localStorage.getItem("name") || "";
+    const email = localStorage.getItem("email") || "";
+    const phone = localStorage.getItem("phone") || "";
+
+    setFormData({ name, email, phone });
   }, []);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -32,16 +29,18 @@ const Profile = () => {
   };
 
   const handleSave = () => {
-    localStorage.setItem("userName", JSON.stringify(formData));
+    localStorage.setItem("name", formData.name);
+    localStorage.setItem("email", formData.email);
+    localStorage.setItem("phone", formData.phone);
     setIsEditing(false);
   };
 
   return (
-    <div className="flex flex-col md:flex-row  p-8">
+    <div className="flex flex-col md:flex-row p-8">
       {/* Details Card */}
-      <div className="bg-white rounded-xl shadow-md p-6 w-full md:w-3/4 flex flex-col md:flex-row items-start gap-6 ">
+      <div className="bg-white rounded-xl shadow-md p-6 w-full md:w-3/4 flex flex-col md:flex-row items-start gap-6">
         {/* Image Section */}
-        <div className="w-full md:w-1/3 flex justify-center mt-10  mx-auto">
+        <div className="w-full md:w-1/3 flex justify-center mt-10 mx-auto">
           <Image
             src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp"
             alt="Profile Picture"
@@ -52,11 +51,9 @@ const Profile = () => {
         </div>
 
         {/* Details Section */}
-        <div className="w-full mx-auto pl-30 md:w-2/3  mt-18 text-2xl">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">
-            User Details
-          </h2>
-          <p className="text-gray-700 mb-2 ">
+        <div className="w-full mx-auto md:w-2/3 mt-10 text-2xl">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">User Details</h2>
+          <p className="text-gray-700 mb-2">
             <strong>Name:</strong> {formData.name}
           </p>
           <p className="text-gray-700 mb-2">
@@ -69,7 +66,7 @@ const Profile = () => {
       </div>
 
       {/* Edit Form */}
-      <div className="bg-black text-white rounded-xl shadow-lg p-6 w-full md:w-1/2 ">
+      <div className="bg-black text-white rounded-xl shadow-lg p-6 w-full md:w-1/2 mt-6 md:mt-0">
         <h2 className="text-2xl font-bold mb-4">Edit User Details</h2>
         <form className="space-y-4">
           <div>
