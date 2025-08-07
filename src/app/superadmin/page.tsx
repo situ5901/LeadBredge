@@ -84,7 +84,7 @@ const LoanDashboard = () => {
   };
 
   const handleDeleteData = async () => {
-    if (!token) return toast.error('No token found in localStorage.');
+    if (!token) return toast.error('No token found');
     setLoading(true);
     try {
       const res = await fetch('https://keshvacredit.com/api/v1/admin/v1/filterdata/delete', {
@@ -190,9 +190,9 @@ const LoanDashboard = () => {
             )}
           </div>
         </div>
+
         <section>
           <Lenderdata />
-
         </section>
 
 

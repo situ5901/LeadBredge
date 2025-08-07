@@ -11,6 +11,22 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  function getItemWithExpiry(key: string): string | null {
+    const value = localStorage.getItem(key);
+    const expiry = localStorage.getItem(`${key}_expiry`);
+
+    if (!value || !expiry) return null;
+
+    if (Date.now() > parseInt(expiry)) {
+      localStorage.removeItem(key);
+      localStorage.removeItem(`${key}_expiry`);
+      return null;
+    }
+
+    return value;
+  }
+
+
   const endpoints = [
     {
       url: "https://keshvacredit.com/api/v1/admin/login",
@@ -64,9 +80,15 @@ export default function LoginPage() {
           const userRole = data.role.toLowerCase();
           const token = data.token;
 
+          const expiryTime = Date.now() + 24 * 60 * 60 * 1000; // 24 hours in ms
+
           localStorage.setItem("token", token);
           localStorage.setItem("role", userRole);
           localStorage.setItem("userName", username);
+
+          localStorage.setItem("token_expiry", expiryTime.toString());
+          localStorage.setItem("role_expiry", expiryTime.toString());
+          localStorage.setItem("userName_expiry", expiryTime.toString());
 
           // Show success toast
           toast.success(successMessage, {
@@ -80,7 +102,7 @@ export default function LoginPage() {
             else if (userRole === "member") router.push("/Partner");
             else if (userRole === "agent") router.push("/agent");
             else toast.error("Unknown role: " + userRole);
-          }, 2000);
+          }, 3000);
 
           success = true;
           break;
@@ -99,8 +121,8 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userRole = localStorage.getItem("role");
+    const token = getItemWithExpiry("token");
+    const userRole = getItemWithExpiry("role");
 
     if (token && userRole) {
       setTimeout(() => {
@@ -108,7 +130,7 @@ export default function LoginPage() {
         else if (userRole === "member") router.push("/Partner");
         else if (userRole === "agent") router.push("/agent");
         else toast.error("Unknown role: " + userRole);
-        console.log("Redirecting to home page"  )
+        console.log("Redirecting to home page")
       }, 2000);
     }
   }, [router]);
@@ -168,7 +190,13 @@ export default function LoginPage() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                 />
               </svg>
             ) : (
@@ -183,13 +211,7 @@ export default function LoginPage() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
                 />
               </svg>
             )}

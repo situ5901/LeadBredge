@@ -3,19 +3,21 @@
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
-    AreaChart,
-    Area,
+    BarChart,
+    Bar,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
+    Legend
 } from 'recharts';
 
 type RowData = {
     srNo: number;
     lenderName: string;
     leads_sent: number;
+    leads_offer: number;
     leads_rejected: number;
     leads_processed: number;
     leads_total: number;
@@ -80,6 +82,11 @@ const LoanDashboard = () => {
                         key.toLowerCase().includes('rejected')
                     )?.[1] || 0,
 
+                leads_offer:
+                    Object.entries(raw).find(([key]) =>
+                        key.toLowerCase().includes('offers')
+                    )?.[1] || 0,
+
                 leads_processed:
                     Object.entries(raw).find(([key]) =>
                         key.toLowerCase().includes('processed')
@@ -121,6 +128,9 @@ const LoanDashboard = () => {
                                         Leads Sent
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        Leads Offer
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                                         Leads Rejected
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -154,6 +164,9 @@ const LoanDashboard = () => {
                                                 {Number(row.leads_sent).toLocaleString()}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
+                                                {Number(row.leads_offer).toLocaleString()}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
                                                 {Number(row.leads_rejected).toLocaleString()}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">
@@ -179,29 +192,26 @@ const LoanDashboard = () => {
                     </div>
                 </div>
 
-
                 {!isLoading.lenderStats && lenderTableData.length > 0 && (
                     <div className="mt-10 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                         <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                            Leads Sent per Lender
+                            Lender Lead Status Breakdown
                         </h2>
                         <ResponsiveContainer width="100%" height={300}>
-                            <AreaChart data={lenderTableData}>
+                            <BarChart data={lenderTableData}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="lenderName" />
                                 <YAxis />
                                 <Tooltip />
-                                <Area
-                                    type="monotone"
-                                    dataKey="leads_sent"
-                                    stroke="#00bcd4"
-                                    fill="#00bcd4"
-                                />
-                            </AreaChart>
+                                <Legend />
+                                <Bar dataKey="leads_sent" stackId="a" fill="#3b82f6" name="Leads Sent" />
+                                <Bar dataKey="leads_offer" stackId="a" fill="#22c55e" name="Leads Offer" />
+                                <Bar dataKey="leads_rejected" stackId="a" fill="#ef4444" name="Leads Rejected" />
+                                <Bar dataKey="leads_processed" stackId="a" fill="#eab308" name="Leads Processed" />
+                            </BarChart>
                         </ResponsiveContainer>
                     </div>
                 )}
-
             </div>
         </div>
     );
