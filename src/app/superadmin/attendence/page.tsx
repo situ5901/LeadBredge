@@ -2,88 +2,88 @@
 import { useState, useEffect } from "react";
 
 interface Employee {
-    name: string;
-    attendance: { [date: string]: string };
+  name: string;
+  attendance: { [date: string]: string };
 }
 
 export default function AttendanceApp() {
-    // Load data from localStorage during initial state setup
-    const [employees, setEmployees] = useState<Employee[]>(() => {
-        try {
-            const savedData = localStorage.getItem("attendanceData");
-            return savedData ? JSON.parse(savedData) : [];
-        } catch (error) {
-            console.error("Error loading data from localStorage:", error);
-            return [];
-        }
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [name, setName] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+
+  // ✅ Load from localStorage only on client side
+  useEffect(() => {
+    try {
+      const savedData = localStorage.getItem("attendanceData");
+      if (savedData) {
+        setEmployees(JSON.parse(savedData));
+      }
+    } catch (error) {
+      console.error("Error loading data from localStorage:", error);
+    }
+  }, []);
+
+  // ✅ Save to localStorage when employees change
+  useEffect(() => {
+    if (employees.length > 0) {
+      localStorage.setItem("attendanceData", JSON.stringify(employees));
+    }
+  }, [employees]);
+
+  const addEmployee = () => {
+    if (name.trim() === "") return;
+    if (!employees.some((e) => e.name.toLowerCase() === name.toLowerCase())) {
+      setEmployees([...employees, { name: name.trim(), attendance: {} }]);
+    }
+    setName("");
+  };
+
+  const updateAttendance = (employeeName: string, status: string) => {
+    setEmployees((prev) =>
+      prev.map((employee) =>
+        employee.name === employeeName
+          ? {
+              ...employee,
+              attendance: {
+                ...employee.attendance,
+                [date]: status,
+              },
+            }
+          : employee
+      )
+    );
+  };
+
+  const getSummary = () => {
+    let present = 0,
+      absent = 0,
+      halfDay = 0,
+      leave = 0;
+    employees.forEach((e) => {
+      const status = e.attendance[date];
+      if (status === "Present") present++;
+      if (status === "Absent") absent++;
+      if (status === "Half Day") halfDay++;
+      if (status === "Leave") leave++;
     });
+    return { present, absent, halfDay, leave };
+  };
 
-    const [name, setName] = useState("");
-    const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const downloadEmployeeData = (employee: Employee) => {
+    const dataStr = JSON.stringify(employee, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${employee.name}_attendance.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
-    // Save to localStorage whenever the employees state changes
-    useEffect(() => {
-        localStorage.setItem("attendanceData", JSON.stringify(employees));
-    }, [employees]);
-
-    // Add an employee
-    const addEmployee = () => {
-        if (name.trim() === "") return;
-        if (!employees.some((e) => e.name.toLowerCase() === name.toLowerCase())) {
-            setEmployees([...employees, { name: name.trim(), attendance: {} }]);
-        }
-        setName("");
-    };
-
-    // Update attendance
-    const updateAttendance = (employeeName: string, status: string) => {
-        setEmployees(
-            employees.map((employee) =>
-                employee.name === employeeName
-                    ? {
-                        ...employee,
-                        attendance: {
-                            ...employee.attendance,
-                            [date]: status,
-                        },
-                    }
-                    : employee
-            )
-        );
-    };
-
-    // Count summary for the current date
-    const getSummary = () => {
-        let present = 0,
-            absent = 0,
-            halfDay = 0,
-            leave = 0;
-        employees.forEach((e) => {
-            const status = e.attendance[date];
-            if (status === "Present") present++;
-            if (status === "Absent") absent++;
-            if (status === "Half Day") halfDay++;
-            if (status === "Leave") leave++;
-        });
-        return { present, absent, halfDay, leave };
-    };
-
-    // Download a single employee's data as a JSON file
-    const downloadEmployeeData = (employee: Employee) => {
-        const dataStr = JSON.stringify(employee, null, 2);
-        const blob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${employee.name}_attendance.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    };
-
-    const summary = getSummary();
-    const allDates = [...new Set(employees.flatMap(e => Object.keys(e.attendance)))].sort();
+  const summary = getSummary();
+  const allDates = [...new Set(employees.flatMap((e) => Object.keys(e.attendance)))].sort();
 
     return (
         <div className="min-h-screen">
