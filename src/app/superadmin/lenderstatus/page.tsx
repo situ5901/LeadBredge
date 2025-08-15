@@ -4,53 +4,42 @@ import * as XLSX from "xlsx";
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-// Define the size of chunks for API calls to manage load
-const CHUNK_SIZE = 1000;
+const CHUNK_SIZE = 2000;
+const MAX_ROWS = 200000;
 
 const FilterUploadPage = () => {
-  // State variables for UI and data management
-  const [loading, setLoading] = useState(false); // Indicates if an operation is in progress
-  const [progress, setProgress] = useState(""); // Textual progress message
-  const [progressPercent, setProgressPercent] = useState(0); // Numerical progress percentage
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // The file selected for upload
-  const [finalResults, setFinalResults] = useState<any[] | null>(null); // Results from bulk upload
-  const [activeTab, setActiveTab] = useState<"upload" | "search">("search"); // Controls active tab (Bulk Upload or Single Search)
-  const [leadId, setLeadId] = useState(""); // Input for single lead ID search
-  const [singleResult, setSingleResult] = useState<any>(null); // Result from single lead ID search
+  // State variables
+  const [loading, setLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [progress, setProgress] = useState("");
+  const [progressPercent, setProgressPercent] = useState(0);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [finalResults, setFinalResults] = useState<any[] | null>(null);
+  const [activeTab, setActiveTab] = useState<"upload" | "search">("search");
+  const [leadId, setLeadId] = useState("");
+  const [singleResult, setSingleResult] = useState<any>(null);
 
-  // State for custom modal (replaces browser's alert)
+  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
 
-  /**
-   * Displays a custom modal with a given message.
-   * @param message The message to display in the modal.
-   */
+  // Modal display utility
   const showAlert = (message: string) => {
     setModalMessage(message);
     setShowModal(true);
   };
 
-  /**
-   * Handles file selection from the input.
-   * Clears previous results when a new file is selected.
-   * @param e The change event from the file input.
-   */
+  // File selection handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setFinalResults(null); // Clear previous results on new file selection
+      setFinalResults(null);
       console.log("📁 File selected:", file.name);
     }
   };
 
-  /**
-   * Chunks an array into smaller arrays of a specified size.
-   * @param arr The array to chunk.
-   * @param size The desired size of each chunk.
-   * @returns An array of chunks.
-   */
+  // Array chunking utility
   const chunkArray = (arr: any[], size: number) => {
     const result = [];
     for (let i = 0; i < arr.length; i += size) {
@@ -59,17 +48,14 @@ const FilterUploadPage = () => {
     return result;
   };
 
-  /**
-   * Handles the bulk upload and processing of lead IDs from a CSV/Excel file.
-   * Reads the file, extracts lead IDs, calls two APIs in chunks, and compiles results.
-   */
+  // Bulk upload handler
   const handleUpload = async () => {
     if (!selectedFile) return;
 
     setLoading(true);
     setProgress("📖 Reading file...");
     setProgressPercent(5);
-    setFinalResults(null); // Clear previous results
+    setFinalResults(null);
 
     const reader = new FileReader();
     reader.onload = async (evt) => {
@@ -77,6 +63,12 @@ const FilterUploadPage = () => {
       const workbook = XLSX.read(bstr, { type: "binary" });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(sheet) as any[];
+
+      if (data.length > MAX_ROWS) {
+        showAlert("File contains more than 2 lakh rows. Please upload file with less than 2 lakh rows.");
+        setLoading(false);
+        return;
+      }
 
       // Find the 'lead_id' column, case-insensitive
       const leadIdKey = Object.keys(data[0] || {}).find(
@@ -91,8 +83,6 @@ const FilterUploadPage = () => {
 
       const leadIdToRowMap: Record<string, any> = {};
       const leadIds: string[] = [];
-
-      // Extract lead IDs and map them to their original rows
       data.forEach((row) => {
         const leadId = row[leadIdKey]?.toString().trim();
         if (leadId) {
@@ -110,24 +100,35 @@ const FilterUploadPage = () => {
       const chunks = chunkArray(leadIds, CHUNK_SIZE);
       const allResults: any[] = [];
 
-      // Process each chunk
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
         setProgress(`🔁 Processing chunk ${i + 1} of ${chunks.length}...`);
         setProgressPercent(Math.round(((i + 1) / chunks.length) * 100));
 
         try {
-          // Make parallel API calls for check-leads and final-loan-details
-          const [checkLeadsResponse, finalLoanDetailsResponse] = await Promise.allSettled([
-            axios.post("https://keshvacredit.com/api/v1/api/check-leads", { leadIds: chunk }, { headers: { "Content-Type": "application/json" } }),
-            axios.post("https://keshvacredit.com/api/v1/api/final-loan-details", { leadIds: chunk }, { headers: { "Content-Type": "application/json" } }),
-          ]);
+          const [checkLeadsResponse, finalLoanDetailsResponse] =
+            await Promise.allSettled([
+              axios.post(
+                "https://keshvacredit.com/api/v1/api/check-leads",
+                { leadIds: chunk },
+                { headers: { "Content-Type": "application/json" } }
+              ),
+              axios.post(
+                "https://keshvacredit.com/api/v1/api/final-loan-details",
+                { leadIds: chunk },
+                { headers: { "Content-Type": "application/json" } }
+              ),
+            ]);
 
-          // Extract results, handling potential rejections for individual promises
-          const checkLeadsResults = checkLeadsResponse.status === 'fulfilled' ? checkLeadsResponse.value.data?.results || [] : [];
-          const finalLoanDetailsResults = finalLoanDetailsResponse.status === 'fulfilled' ? finalLoanDetailsResponse.value.data?.results || [] : [];
+          const checkLeadsResults =
+            checkLeadsResponse.status === "fulfilled"
+              ? checkLeadsResponse.value.data?.results || []
+              : [];
+          const finalLoanDetailsResults =
+            finalLoanDetailsResponse.status === "fulfilled"
+              ? finalLoanDetailsResponse.value.data?.results || []
+              : [];
 
-          // Create maps for quick lookup of API responses by leadId
           const checkLeadsMap: Record<string, any> = {};
           checkLeadsResults.forEach((item: any) => {
             checkLeadsMap[item.leadId] = item.fullResponse || {};
@@ -138,14 +139,27 @@ const FilterUploadPage = () => {
             finalLoanDetailsMap[item.leadId] = item.fullResponse || {};
           });
 
-          // Combine original row data with API responses for each lead in the chunk
           chunk.forEach((leadId) => {
             const originalRow = leadIdToRowMap[leadId] || {};
-            // Default values for API responses if not found or API failed
-            const checkLeadsData = checkLeadsMap[leadId] || { status: "N/A", code: "N/A", message: "No data from API", leadStatus: "N/A" };
-            const finalLoanDetailsData = finalLoanDetailsMap[leadId] || { status: "N/A", loanAmount: "N/A", emi: "N/A", processingFee: "N/A", processingFeeWithoutGST: "N/A", tenure: "N/A", rateOfInterest: "N/A", amountTransferable: "N/A", preEmi: "N/A", lendingPartner: "N/A" };
+            const checkLeadsData = checkLeadsMap[leadId] || {
+              status: "N/A",
+              code: "N/A",
+              message: "No data from API",
+              leadStatus: "N/A",
+            };
+            const finalLoanDetailsData = finalLoanDetailsMap[leadId] || {
+              status: "N/A",
+              loanAmount: "N/A",
+              emi: "N/A",
+              processingFee: "N/A",
+              processingFeeWithoutGST: "N/A",
+              tenure: "N/A",
+              rateOfInterest: "N/A",
+              amountTransferable: "N/A",
+              preEmi: "N/A",
+              lendingPartner: "N/A",
+            };
 
-            // Push combined data, prefixing API response keys for clarity in CSV
             allResults.push({
               ...originalRow,
               checkLeads_status: checkLeadsData.status,
@@ -165,9 +179,7 @@ const FilterUploadPage = () => {
             });
           });
         } catch (err) {
-          // Log unexpected errors during chunk processing
           console.error("❌ An unexpected error occurred during chunk processing", i + 1, err);
-          // Mark all leads in this chunk as failed if a catastrophic error occurs
           chunk.forEach((leadId) => {
             const originalRow = leadIdToRowMap[leadId] || {};
             allResults.push({
@@ -189,6 +201,8 @@ const FilterUploadPage = () => {
             });
           });
         }
+        // Optional: Let browser breathe on every big chunk
+        if (chunks.length > 50) await new Promise((res) => setTimeout(res, 10));
       }
 
       setFinalResults(allResults);
@@ -200,10 +214,7 @@ const FilterUploadPage = () => {
     reader.readAsBinaryString(selectedFile);
   };
 
-  /**
-   * Handles the search for a single lead ID.
-   * Calls both check-leads and final-loan-details APIs for the given lead ID.
-   */
+  // Single search handler
   const handleSearch = async () => {
     if (!leadId.trim()) {
       showAlert("Please enter a lead ID");
@@ -219,7 +230,6 @@ const FilterUploadPage = () => {
       const payload = { leadIds: [leadId.trim()] };
       const headers = { "Content-Type": "application/json" };
 
-      // Make parallel API calls for single search
       const [checkLeadsResponse, finalLoanDetailsResponse] = await Promise.all([
         axios.post("https://keshvacredit.com/api/v1/api/check-leads", payload, { headers }),
         axios.post("https://keshvacredit.com/api/v1/api/final-loan-details", payload, { headers }),
@@ -227,9 +237,9 @@ const FilterUploadPage = () => {
 
       setProgressPercent(75);
 
-      // Extract results, providing default "N/A" for missing data
       const checkLeadsResult = checkLeadsResponse.data?.results?.[0] || {};
-      const finalLoanDetailsResult = finalLoanDetailsResponse.data?.results?.[0]?.fullResponse || {};
+      const finalLoanDetailsResult =
+        finalLoanDetailsResponse.data?.results?.[0]?.fullResponse || {};
 
       setSingleResult({
         leadId: leadId,
@@ -257,7 +267,6 @@ const FilterUploadPage = () => {
       setProgressPercent(100);
     } catch (err) {
       console.error("❌ API call failed", err);
-      // Set error status for single search results
       setSingleResult({
         leadId: leadId,
         checkLeads: {
@@ -275,63 +284,61 @@ const FilterUploadPage = () => {
     }
   };
 
-  /**
-   * Downloads the processed results as a CSV file.
-   */
+  // Download CSV handler – async with spinner
   const handleDownloadCSV = () => {
     if (!finalResults) return;
 
-    // The finalResults array already contains flattened data with prefixed keys,
-    // so it can be directly converted to a sheet.
-    const exportData = finalResults.map((row) => ({
-      ...row,
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const csv = XLSX.utils.sheet_to_csv(ws);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    saveAs(blob, "lead_status_results.csv");
-    console.log("📥 CSV downloaded with", finalResults.length, "rows");
+    setIsDownloading(true);
+    setTimeout(() => {
+      try {
+        const exportData = finalResults.map((row) => ({ ...row }));
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const csv = XLSX.utils.sheet_to_csv(ws);
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        saveAs(blob, "lead_status_results.csv");
+        console.log("📥 CSV downloaded with", finalResults.length, "rows");
+      } catch (error) {
+        console.error("Error during CSV download:", error);
+        showAlert("Error during CSV download. Please try again.");
+      } finally {
+        setIsDownloading(false);
+      }
+    }, 100);
   };
 
-  /**
-   * Renders a detail card for displaying API response data.
-   * @param title The title of the card.
-   * @param data The data object to display.
-   * @returns A React component for the detail card.
-   */
-  const renderDetailCard = (title: string, data: any) => {
-    return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-4">
-        <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-800">{title}</h3>
-        </div>
-        <div className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(data).map(([key, value]) => (
-              <div key={key} className="space-y-1">
-                <label className="block text-sm font-medium text-gray-500 capitalize">
-                  {/* Format key for display (e.g., "leadStatus" becomes "Lead Status") */}
-                  {key.replace(/([A-Z])/g, ' $1').trim()}
-                </label>
-                <p className="text-gray-800 font-medium">
-                  {value?.toString() || 'N/A'}
-                </p>
-              </div>
-            ))}
-          </div>
+  // Render API response card
+  const renderDetailCard = (title: string, data: any) => (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-4">
+      <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+        <h3 className="text-lg font-medium text-gray-800">{title}</h3>
+      </div>
+      <div className="p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Object.entries(data).map(([key, value]) => (
+            <div key={key} className="space-y-1">
+              <label className="block text-sm font-medium text-gray-500 capitalize">
+                {key.replace(/([A-Z])/g, " $1").trim()}
+              </label>
+              <p className="text-gray-800 font-medium">
+                {value?.toString() || "N/A"}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
-    );
-  };
+    </div>
+  );
 
+  // Main component render
   return (
     <div className="mx-auto p-4 mb-5 font-sans">
-      {/* Custom Modal for alerts */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Notification</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Notification
+            </h3>
             <p className="text-gray-700 mb-6">{modalMessage}</p>
             <button
               onClick={() => setShowModal(false)}
@@ -342,8 +349,7 @@ const FilterUploadPage = () => {
           </div>
         </div>
       )}
-
-      <div className=" overflow-hidden mb-8">
+      <div className="overflow-hidden mb-8">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-gray-800 mb-2 text-center">
             Lead Status & Loan Details Checker Moneyview
@@ -362,7 +368,7 @@ const FilterUploadPage = () => {
               }`}
               onClick={() => {
                 setActiveTab("upload");
-                setSingleResult(null); // Clear single search results
+                setSingleResult(null);
                 setProgress("");
                 setProgressPercent(0);
               }}
@@ -377,8 +383,8 @@ const FilterUploadPage = () => {
               }`}
               onClick={() => {
                 setActiveTab("search");
-                setFinalResults(null); // Clear bulk upload results
-                setSelectedFile(null); // Clear selected file
+                setFinalResults(null);
+                setSelectedFile(null);
                 setProgress("");
                 setProgressPercent(0);
               }}
@@ -388,7 +394,7 @@ const FilterUploadPage = () => {
           </div>
 
           <div className="space-y-6">
-            {/* Bulk Upload Tab Content */}
+            {/* Bulk Upload Tab */}
             {activeTab === "upload" ? (
               <>
                 <div className="space-y-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
@@ -428,7 +434,6 @@ const FilterUploadPage = () => {
                       </label>
                     </div>
                   </div>
-
                   {selectedFile && (
                     <button
                       onClick={handleUpload}
@@ -469,8 +474,7 @@ const FilterUploadPage = () => {
                     </button>
                   )}
                 </div>
-
-                {/* Progress bar for bulk upload */}
+                {/* Progress bar */}
                 {loading && (
                   <div className="mt-4 space-y-2 p-4 bg-white rounded-lg border border-gray-200">
                     <p className="text-gray-700 font-medium">{progress}</p>
@@ -486,7 +490,7 @@ const FilterUploadPage = () => {
                   </div>
                 )}
 
-                {/* Download results button for bulk upload */}
+                {/* Download button */}
                 {finalResults && (
                   <div className="mt-6 space-y-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -512,29 +516,62 @@ const FilterUploadPage = () => {
                     </div>
                     <button
                       onClick={handleDownloadCSV}
-                      className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all shadow-md flex items-center justify-center"
+                      disabled={isDownloading}
+                      className={`w-full py-3 px-4 rounded-lg font-medium transition-all shadow-md flex items-center justify-center ${
+                        isDownloading
+                          ? "bg-green-400 cursor-not-allowed"
+                          : "bg-green-600 hover:bg-green-700"
+                      } text-white`}
                     >
-                      <svg
-                        className="w-5 h-5 mr-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                        />
-                      </svg>
-                      Download Results (CSV)
+                      {isDownloading ? (
+                        <>
+                          <svg
+                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          Downloading...
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="w-5 h-5 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                            />
+                          </svg>
+                          Download Results (CSV)
+                        </>
+                      )}
                     </button>
                   </div>
                 )}
               </>
             ) : (
-              // Single Search Tab Content
+              // Single Search Tab
               <>
                 <div className="space-y-4 p-6 bg-gray-50 rounded-lg border border-gray-200">
                   <div>
@@ -563,8 +600,7 @@ const FilterUploadPage = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Progress bar for single search */}
+                {/* Progress Bar */}
                 {loading && (
                   <div className="mt-4 space-y-2 p-4 bg-white rounded-lg border border-gray-200">
                     <p className="text-gray-700 font-medium">{progress}</p>
@@ -580,12 +616,14 @@ const FilterUploadPage = () => {
                   </div>
                 )}
 
-                {/* Display single search results */}
+                {/* Display results */}
                 {singleResult && (
                   <div className="mt-6 space-y-4">
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                       <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                        <h3 className="text-lg font-medium text-gray-800">Lead Information</h3>
+                        <h3 className="text-lg font-medium text-gray-800">
+                          Lead Information
+                        </h3>
                       </div>
                       <div className="p-4">
                         <div className="grid grid-cols-1 gap-4">
@@ -600,13 +638,11 @@ const FilterUploadPage = () => {
                         </div>
                       </div>
                     </div>
-
                     {renderDetailCard("Lead Status Details", singleResult.checkLeads)}
                     {renderDetailCard("Loan Details", singleResult.finalLoanDetails)}
                   </div>
                 )}
-
-                {/* Status message for single search (after loading) */}
+                {/* Status messages */}
                 {!loading && progress && (
                   <div
                     className={`p-4 rounded-lg ${
