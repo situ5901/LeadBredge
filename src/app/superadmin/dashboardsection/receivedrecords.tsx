@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 
 export default function PartnerDashboard() {
-    const [partnerId1, setPartnerId1] = useState("Creditsea-keshva");
-    const [partnerId2, setPartnerId2] = useState("bharti");
+    const [partnerId1, setPartnerId1] = useState("");
+    const [partnerId2, setPartnerId2] = useState("");
     const [apiData, setApiData] = useState<any>(null);
     const [crmData, setCrmData] = useState<any>(null);
     const [loading1, setLoading1] = useState(false);
@@ -11,8 +11,8 @@ export default function PartnerDashboard() {
 
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-    // Fetch API Data (partnerData)
     const fetchApiData = async () => {
+        if (!partnerId1) return;
         setLoading1(true);
         try {
             const res = await fetch(
@@ -34,8 +34,8 @@ export default function PartnerDashboard() {
         setLoading1(false);
     };
 
-    // Fetch CRM Data (membersData)
     const fetchCrmData = async () => {
+        if (!partnerId2) return;
         setLoading2(true);
         try {
             const res = await fetch(
@@ -73,7 +73,11 @@ export default function PartnerDashboard() {
                     </select>
                     <button
                         onClick={fetchApiData}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                        disabled={!partnerId1}
+                        className={`px-4 py-2 rounded-lg text-white ${partnerId1
+                                ? "bg-blue-600 hover:bg-blue-700"
+                                : "bg-gray-400 cursor-not-allowed"
+                            }`}
                     >
                         Fetch
                     </button>
@@ -100,11 +104,14 @@ export default function PartnerDashboard() {
                     >
                         <option value="">choose partner</option>
                         <option value="tester007">tester007</option>
-                        <option value="bharti">bharti</option>
-                    </select>   
+                    </select>
                     <button
                         onClick={fetchCrmData}
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                        disabled={!partnerId2}
+                        className={`px-4 py-2 rounded-lg text-white ${partnerId2
+                                ? "bg-green-600 hover:bg-green-700"
+                                : "bg-gray-400 cursor-not-allowed"
+                            }`}
                     >
                         Fetch
                     </button>
