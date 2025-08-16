@@ -343,8 +343,8 @@ export default function PartnerDashboard() {
       <div className="rounded-2xl shadow-lg border border-gray-200 bg-white overflow-hidden">
         {/* Header */}
         <div className="p-8 bg-gradient-to-r from-blue-600 to-indigo-600 text-center">
-          <h2 className="text-3xl font-bold text-white">Dedupe Tool</h2>
-          <p className="mt-2 text-blue-100">Easily detect and manage duplicate records</p>
+          <h2 className="text-3xl font-bold text-white">Dedupe Find And Upload Tool</h2>
+          <p className="mt-2 text-blue-100">Easily detect and manage duplicate records and upload uniqe records to database</p>
         </div>
 
         <div className="p-8 space-y-8">
@@ -412,9 +412,9 @@ export default function PartnerDashboard() {
               <button
                 onClick={handleUploadToInfiSchema}
                 disabled={uploadingToInfi}
-                className="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                className="px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-green-700 transition"
               >
-                {uploadingToInfi ? '📤 Uploading...' : '✅ Upload Unique Records to InfiSchema'}
+                {uploadingToInfi ? '📤 Uploading...' : '✅ Upload Unique Records'}
               </button>
             </div>
           )}

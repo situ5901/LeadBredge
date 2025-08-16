@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import Lenderdata from "./dashboardsection/page1"
+import Receiveddata from "./dashboardsection/receivedrecords"
 import {
   BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip,
@@ -190,6 +191,9 @@ const LoanDashboard = () => {
             )}
           </div>
         </div>
+        <section>
+         <Receiveddata />
+        </section>
 
         <section>
           <Lenderdata />
