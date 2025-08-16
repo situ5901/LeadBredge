@@ -60,7 +60,7 @@ export default function PartnerDashboard() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
             {/* Box 1: API Data */}
-            <div className="p-6 bg-white rounded-2xl shadow">
+            <div className="p-6 bg-blue-100 rounded-2xl shadow">
                 <h2 className="text-lg font-bold text-blue-700 mb-4">📊 Received from API</h2>
                 <div className="flex items-center gap-3 mb-4">
                     <select
@@ -89,12 +89,12 @@ export default function PartnerDashboard() {
                         Count: {apiData.count}
                     </p>
                 ) : (
-                    <p className="text-gray-400">No data yet</p>
+                    <p className="text-gray-700">No data yet</p>
                 )}
             </div>
 
             {/* Box 2: CRM Data */}
-            <div className="p-6 bg-white rounded-2xl shadow">
+            <div className="p-6 bg-green-100 rounded-2xl shadow">
                 <h2 className="text-lg font-bold mb-4 text-green-600">🔗 Received from CRM</h2>
                 <div className="flex items-center gap-3 mb-4">
                     <select
@@ -123,7 +123,7 @@ export default function PartnerDashboard() {
                         Count: {crmData.count}
                     </p>
                 ) : (
-                    <p className="text-gray-400">No data yet</p>
+                    <p className="text-gray-700">No data yet</p>
                 )}
             </div>
         </div>
