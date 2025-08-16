@@ -31,8 +31,12 @@ export default function MemberPanelLayout({
   const handleLogout = () => {
     localStorage.removeItem("role");
     localStorage.removeItem("userName");
-      localStorage.removeItem("email");
-       localStorage.removeItem("phone");
+    localStorage.removeItem("email");
+    localStorage.removeItem("phone");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userName_expiry");
+    localStorage.removeItem("token_expiry");
+    localStorage.removeItem("role_expiry");
     router.push("/");
   };
 
@@ -135,11 +139,11 @@ export default function MemberPanelLayout({
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                <Link href="/agent/profile">
-                  <div className="w-9 h-9 rounded-full cursor-pointer bg-blue-500 flex items-center justify-center text-white font-medium text-sm">
-                    
-                    {userName?.charAt(0).toUpperCase()}
-                  </div>
+                  <Link href="/agent/profile">
+                    <div className="w-9 h-9 rounded-full cursor-pointer bg-blue-500 flex items-center justify-center text-white font-medium text-sm">
+
+                      {userName?.charAt(0).toUpperCase()}
+                    </div>
                   </Link>
                 </div>
                 <div className="hidden md:block">

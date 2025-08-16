@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Toaster } from 'react-hot-toast';
-import { Menu, X, LayoutDashboard, Users, Clock, LogOut, BadgeCheck, UserCog, Globe, Merge, CalendarCheck2  } from "lucide-react";
+import { Menu, X, LayoutDashboard, Users, Clock, LogOut, BadgeCheck, UserCog, Globe, Merge, CalendarCheck2 } from "lucide-react";
 import Image from "next/image";
 
 
@@ -31,6 +31,10 @@ export default function AdminPanelLayout({
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userName_expiry");
+    localStorage.removeItem("token_expiry");
+    localStorage.removeItem("role_expiry");
     router.push("/");
   };
 

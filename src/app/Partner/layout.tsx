@@ -20,6 +20,7 @@ export default function MemberPanelLayout({
       const token = localStorage.getItem("token");
       const role = localStorage.getItem("role");
 
+
       if (!token || role !== "member") {
         router.push("/");
       }
@@ -30,6 +31,10 @@ export default function MemberPanelLayout({
   const handleLogout = () => {
     localStorage.removeItem("role");
     localStorage.removeItem("userName");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userName_expiry");
+    localStorage.removeItem("token_expiry");
+    localStorage.removeItem("role_expiry");
     router.push("/");
   };
 
